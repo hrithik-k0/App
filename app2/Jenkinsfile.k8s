@@ -1,0 +1,66 @@
+pipeline {
+  agent any
+
+  environment {
+    DOCKERHUB = credentials('dockerhub-creds')
+    GIT_CREDS = 'github-creds'
+    IMAGE = "yourdockerhubusername/my-app"
+    TAG = "${env.BUILD_ID}"
+  }
+
+  stages {
+    stage('Checkout') {
+      steps {
+        git branch: 'main', credentialsId: env.GIT_CREDS, url: 'https://github.com/your/repo.git'
+      }
+    }
+
+    stage('Build & Test') {
+      steps {
+        sh 'npm ci'
+        sh 'npm test || true'
+      }
+    }
+
+    stage('Build Docker Image') {
+      steps {
+        sh "docker build -t ${IMAGE}:${TAG} ."
+      }
+    }
+
+    stage('Push Docker Image') {
+      steps {
+        withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PSW')]) {
+          sh 'echo $DOCKER_PSW | docker login -u $DOCKER_USER --password-stdin'
+          sh "docker push ${IMAGE}:${TAG}"
+        }
+      }
+    }
+
+    stage('Deploy to Kubernetes') {
+      environment {
+        KUBECONFIG = credentials('kubeconfig') // store kubeconfig as "Secret file"
+      }
+      steps {
+        sh '''
+          echo "Using kubeconfig from credentials"
+          # write kubeconfig file for kubectl/helm
+          mkdir -p $WORKSPACE/.kube
+          cp $KUBECONFIG $WORKSPACE/.kube/config || true
+          export KUBECONFIG=$WORKSPACE/.kube/config
+          kubectl version --client
+          helm upgrade --install my-app ./helm-chart             --namespace my-app --create-namespace             --set image.repository=${IMAGE}             --set image.tag=${TAG}             --wait --timeout 5m
+        '''
+      }
+    }
+  }
+
+  post {
+    success {
+      echo "Deployed ${IMAGE}:${TAG}"
+    }
+    failure {
+      echo "Pipeline failed"
+    }
+  }
+}
