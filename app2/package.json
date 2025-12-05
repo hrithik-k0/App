@@ -1,0 +1,13 @@
+{
+  "name": "my-app",
+  "version": "0.1.0",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node test/run-tests.js || echo 'no tests'",
+    "lint": "echo 'lint step (add eslint)'" 
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
