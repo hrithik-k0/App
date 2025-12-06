@@ -13,6 +13,7 @@ pipeline {
         git branch: 'master', git url: "https://github.com/hrithik-k0/App.git"
       }
     }
+}
 
     stage('Build & Test') {
       steps {
