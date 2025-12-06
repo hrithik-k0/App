@@ -7,7 +7,7 @@ pipeline {
 
   environment {
     DOCKERHUB = credentials('dockerhub-creds')
-    IMAGE = "DOCKER_USER/my-app"
+    IMAGE = "hk00d/my-app"
     TAG = "${env.BUILD_ID}"
   }
 
