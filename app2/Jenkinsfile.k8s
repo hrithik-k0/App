@@ -66,24 +66,22 @@ pipeline {
     }
 
     stage('Deploy to Kubernetes') {
-      environment {
-        KUBECONFIG = credentials('kubeconfig') // store kubeconfig as "Secret file"
-      }
-      steps {
-        sh '''
-          echo "Using kubeconfig from credentials"
-          mkdir -p $WORKSPACE/.kube
-          cp $KUBECONFIG $WORKSPACE/.kube/config || true
-          export KUBECONFIG=$WORKSPACE/.kube/config
-          kubectl version --client
-          helm upgrade --install my-app ./app2/helm-chart \
-            --namespace my-app --create-namespace \
-            --set image.repository=${IMAGE} \
-            --set image.tag=${TAG} \
-            --wait --timeout 5m
-        '''
-      }
-    }
+  environment {
+    KUBECONFIG = credentials('kubeconfig') // Jenkins will inject the path to the kubeconfig file
+  }
+  steps {
+    sh '''
+      echo "Using kubeconfig from credentials"
+      export KUBECONFIG=$KUBECONFIG
+      kubectl version --client
+      helm upgrade --install my-app ./app2/helm-chart \
+        --namespace my-app --create-namespace \
+        --set image.repository=${IMAGE} \
+        --set image.tag=${TAG} \
+        --wait --timeout 5m
+    '''
+  }
+}
   }
 
   post {
