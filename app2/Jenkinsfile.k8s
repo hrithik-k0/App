@@ -10,10 +10,9 @@ pipeline {
   stages {
     stage('Checkout') {
       steps {
-        git branch: 'master', git url: "https://github.com/hrithik-k0/App.git"
+        git url: 'https://github.com/hrithik-k0/App.git', branch: 'master'
       }
     }
-}
 
     stage('Build & Test') {
       steps {
