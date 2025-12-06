@@ -3,7 +3,6 @@ pipeline {
 
   environment {
     DOCKERHUB = credentials('dockerhub-creds')
-    GIT_CREDS = 'github-creds'
     IMAGE = "yourdockerhubusername/my-app"
     TAG = "${env.BUILD_ID}"
   }
@@ -11,7 +10,7 @@ pipeline {
   stages {
     stage('Checkout') {
       steps {
-        git branch: 'main', credentialsId: env.GIT_CREDS, url: 'https://github.com/your/repo.git'
+        git branch: 'master', git url: "https://github.com/hrithik-k0/App.git"
       }
     }
 
