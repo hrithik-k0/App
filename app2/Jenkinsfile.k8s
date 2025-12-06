@@ -16,6 +16,29 @@ pipeline {
         git url: 'https://github.com/hrithik-k0/App.git', branch: 'master'
       }
     }
+stages {
+    stage('Validate lockfile') {
+      steps {
+        // Check that package.json and package-lock.json both exist
+        sh '''
+          if [ ! -f package.json ]; then
+            echo "❌ ERROR: package.json not found in workspace"
+            exit 1
+          fi
+          if [ ! -f package-lock.json ]; then
+            echo "❌ ERROR: package-lock.json not found in workspace"
+            exit 1
+          fi
+          echo "✅ Found package.json and package-lock.json"
+        '''
+
+        // Validate that package-lock.json is proper JSON
+        sh '''
+          node -e "JSON.parse(require('fs').readFileSync('package-lock.json'))"
+          echo "✅ package-lock.json is valid JSON"
+        '''
+      }
+    }
 
     stage('Build & Test') {
       steps {
