@@ -76,7 +76,7 @@ pipeline {
           cp $KUBECONFIG $WORKSPACE/.kube/config || true
           export KUBECONFIG=$WORKSPACE/.kube/config
           kubectl version --client
-          helm upgrade --install my-app ./helm-chart \
+          helm upgrade --install my-app ./app2/helm-chart \
             --namespace my-app --create-namespace \
             --set image.repository=${IMAGE} \
             --set image.tag=${TAG} \
