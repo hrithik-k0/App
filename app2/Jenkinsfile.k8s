@@ -21,34 +21,32 @@ pipeline {
 
     stage('Validate lockfile') {
       steps {
-        // Check that package.json and package-lock.json both exist
-        dir('app2') {   // change to the folder where package.json lives
-
-        sh '''
-          if [ ! -f package.json ]; then
-            echo "❌ ERROR: package.json not found in workspace"
-            exit 1
-          fi
-          if [ ! -f package-lock.json ]; then
-            echo "❌ ERROR: package-lock.json not found in workspace"
-            exit 1
-          fi
-          echo "✅ Found package.json and package-lock.json"
-        '''
-
-        // Validate that package-lock.json is proper JSON
-        sh '''
-          node -e "JSON.parse(require('fs').readFileSync('package-lock.json'))"
-          echo "✅ package-lock.json is valid JSON"
-        '''
+        dir('app2') {
+          sh '''
+            if [ ! -f package.json ]; then
+              echo "❌ ERROR: package.json not found in workspace"
+              exit 1
+            fi
+            if [ ! -f package-lock.json ]; then
+              echo "❌ ERROR: package-lock.json not found in workspace"
+              exit 1
+            fi
+            echo "✅ Found package.json and package-lock.json"
+          '''
+          sh '''
+            node -e "JSON.parse(require('fs').readFileSync('package-lock.json'))"
+            echo "✅ package-lock.json is valid JSON"
+          '''
+        }
       }
     }
 
     stage('Build & Test') {
       steps {
         dir('app2') {
-        sh 'npm ci'
-        sh 'npm test || true'
+          sh 'npm ci'
+          sh 'npm test || true'
+        }
       }
     }
 
@@ -74,7 +72,6 @@ pipeline {
       steps {
         sh '''
           echo "Using kubeconfig from credentials"
-          # write kubeconfig file for kubectl/helm
           mkdir -p $WORKSPACE/.kube
           cp $KUBECONFIG $WORKSPACE/.kube/config || true
           export KUBECONFIG=$WORKSPACE/.kube/config
@@ -96,7 +93,5 @@ pipeline {
     failure {
       echo "Pipeline failed"
     }
-  }
-}
   }
 }
