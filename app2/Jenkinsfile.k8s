@@ -1,5 +1,8 @@
 pipeline {
   agent any
+  tools {
+    nodejs "NodeJS_25"   // must match the name you gave in Global Tool Config
+  }
 
   environment {
     DOCKERHUB = credentials('dockerhub-creds')
