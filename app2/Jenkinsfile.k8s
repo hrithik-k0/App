@@ -15,12 +15,15 @@ pipeline {
     stage('Checkout') {
       steps {
         git url: 'https://github.com/hrithik-k0/App.git', branch: 'master'
+        sh 'ls -R'
       }
     }
 
     stage('Validate lockfile') {
       steps {
         // Check that package.json and package-lock.json both exist
+        dir('app2') {   // change to the folder where package.json lives
+
         sh '''
           if [ ! -f package.json ]; then
             echo "❌ ERROR: package.json not found in workspace"
@@ -43,6 +46,7 @@ pipeline {
 
     stage('Build & Test') {
       steps {
+        dir('app2') {
         sh 'npm ci'
         sh 'npm test || true'
       }
